@@ -32,7 +32,12 @@ class TestFixture : WebApplicationFactory<Program>
         .ConfigureAppConfiguration(config =>
         {
             config.RemoveJsonSource("appsettings.Local.json");
+
             config.AddFakeConfiguration(FakeConfig);
+
+            FakeConfig.ReplaceConfigurationUrls(config, "wiremock", "http://localhost:1234");
+            // replaces any "http://wiremock" value on test config for http://localhost:1234
+
         })
         .ConfigureTestServices(services =>
         {
