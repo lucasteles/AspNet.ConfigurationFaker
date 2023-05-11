@@ -1,0 +1,50 @@
+name: CI
+
+on:
+    workflow_dispatch:
+    push:
+        branches: ["master"]
+
+env:
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        concurrency:
+            group: ${{ github.head_ref || github.ref_name }}
+            cancel-in-progress: true
+
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+
+            - name: Setup .NET Core
+              uses: actions/setup-dotnet@v3
+              with:
+                  global-json-file: global.json
+
+            - name: Tool Restore
+              run: dotnet tool restore
+
+            - name: Build
+              run: dotnet nuke build
+
+            - name: Lines of Code Badge
+              uses: DeathSy/GHA-LoC-Badge@1.0.3
+              with:
+                  directory: ./
+                  badge: ./Badges/lines_badge.svg
+                  patterns: "**/*.fs|**/*.fsx|**/*.cs|**/*.ts|**/*.js"
+                  ignore: "node_modules"
+
+            - name: Publish Badges
+              if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./Badges
+                  publish_branch: badges
+                  force_orphan: true
