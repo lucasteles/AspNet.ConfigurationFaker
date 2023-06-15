@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 
@@ -56,4 +57,17 @@ public static class FakeConfigurationExtensions
         this IConfigurationBuilder builder, string path) =>
         builder.RemoveSource<JsonConfigurationSource>(x =>
             x.Path?.ToLower() == path.ToLower());
+
+    /// <summary>
+    /// Apply each key value of the configuration to IWebHostBuilder
+    /// </summary>
+    public static IWebHostBuilder UseFakeConfigurationProvider(
+        this IWebHostBuilder hostBuilder,
+        FakeConfigurationProvider configuration)
+    {
+        foreach (var setting in configuration)
+            hostBuilder.UseSetting(setting.Key, setting.Value);
+
+        return hostBuilder;
+    }
 }

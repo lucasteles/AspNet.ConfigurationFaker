@@ -29,6 +29,7 @@ class TestFixture : WebApplicationFactory<Program>
     FakeConfigurationProvider FakeConfig { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder) => builder
+        .UseFakeConfigurationProvider(FakeConfig) // for startup/program config mock
         .ConfigureAppConfiguration(config =>
         {
             config.RemoveJsonSource("appsettings.Local.json");
@@ -47,7 +48,7 @@ class TestFixture : WebApplicationFactory<Program>
     [OneTimeSetUp]
     public void OneTimeSetup()
     {
-        FakeConfig.Add("ApiKey", "TestKey");
+        FakeConfig.Add("ApiKey", Guid.NewGuid());
         FakeConfig.Freeze();
     }
 
